@@ -5,7 +5,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 
 import openpyxl
@@ -67,11 +67,11 @@ def fetch_price(driver, code: str, date: datetime.date):
     driver.get(url)
 
     try:
-        # 月間タブを開く
-        period_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, "//button[.='月間']"))
+        # プルダウンから "月間" を選択
+        select_elem = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div[2]/div[2]/div/div[4]/div[2]/div/div[2]/div[1]/div/div/div/select"))
         )
-        period_button.click()
+        Select(select_elem).select_by_value("monthly")
         time.sleep(1)
 
         # 日付を入力（readonly 属性を外して値を直接設定）
@@ -83,9 +83,9 @@ def fetch_price(driver, code: str, date: datetime.date):
             driver.execute_script("arguments[0].removeAttribute('readonly');", elem)
             driver.execute_script("arguments[0].value = arguments[1];", elem, date_str)
 
-        # 更新ボタンを押下
-        update_btn = driver.find_element(By.XPATH, "//button[.='更新']")
-        update_btn.click()
+        # 表示ボタンを押下
+        display_btn = driver.find_element(By.XPATH, "//a[@class='button__1hp- primary__3K8A  radius__1Hzm isBold__1O2x' and text()='表示']")
+        display_btn.click()
 
         # テーブル表示を待機
         WebDriverWait(driver, 10).until(
